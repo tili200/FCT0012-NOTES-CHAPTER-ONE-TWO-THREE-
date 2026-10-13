@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FCT0012: The Survival Vault | Chapters 1 – 3</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            accent: {
+              amber: '#f59e0b',
+              emerald: '#10b981',
+              rose: '#f43f5e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .radar-glow {
+      box-shadow: 0 0 18px -3px rgba(245, 158, 11, 0.45);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Header Banner -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded">FCT0012 Revision Deck</span>
+          <span class="text-xs text-slate-400">Chapters 01 – 03</span>
+        </div>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white mt-1">
+          The Interactive Revision Vault <span class="text-blue-400 text-sm font-normal">v2.6</span>
+        </h1>
+        <p class="text-xs text-slate-400">No gatekeeping here. Master the theory before next week or GG, no cap.</p>
+      </div>
+
+      <!-- Live Search & Toggle -->
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="relative w-full md:w-64">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search key concepts, RAM, ARPANET..." 
+            class="w-full bg-slate-800/80 border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            oninput="renderCards()"
+          />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Filters & Stats -->
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+      <!-- Chapter Pills -->
+      <div class="flex flex-wrap items-center gap-2" id="filterContainer">
+        <button onclick="setFilter('all')" class="filter-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition-all shadow-sm" data-filter="all">All Topics</button>
+        <button onclick="setFilter('ch1')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition-all" data-filter="ch1">Ch 1: ICT Foundations</button>
+        <button onclick="setFilter('ch2')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition-all" data-filter="ch2">Ch 2: Digital Comms</button>
+        <button onclick="setFilter('ch3')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition-all" data-filter="ch3">Ch 3: Educational Tech</button>
+      </div>
+
+      <!-- Radar High-Yield Switch (Stealth Mode) -->
+      <div class="flex items-center gap-2">
+        <button 
+          id="radarToggleBtn" 
+          onclick="toggleRadarOnly()" 
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 border border-amber-500/30 text-amber-300 hover:bg-amber-950/30 transition-all"
+        >
+          <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span>Lecturer's Radar (High-Yield Only)</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Gallery Main Area -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+    <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Dynamic Note Cards Rendered Here -->
+    </div>
+    
+    <div id="noResults" class="hidden text-center py-16">
+      <p class="text-base text-slate-400">Aiyo, no cards found matching that search term! Reset your filters or search something else lah.</p>
+    </div>
+  </main>
+
+  <!-- Interactive Modal Drawer for In-Depth Reading -->
+  <div id="modalBackdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 max-w-2xl w-full rounded-2xl p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-start gap-4 mb-4">
+        <div>
+          <span id="modalChapter" class="text-xs uppercase font-bold tracking-wider text-blue-400"></span>
+          <h2 id="modalTitle" class="text-xl font-bold text-white mt-1"></h2>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="modalBody" class="text-sm text-slate-300 space-y-4 leading-relaxed">
+        <!-- Injected modal content -->
+      </div>
+      <div class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+        <span id="modalSlangTip"></span>
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 font-semibold text-white">Got it, let him cook</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <p>Crafted for FCT0012 Learners • Management &amp; Science University • Study smartly, get your rest, and don't cram last minute!</p>
+  </footer>
+
+  <script>
+    // Note Data Repository
+    const topics = [
+      {
+        id: 1,
+        chapter: "ch1",
+        chapterName: "Chapter 1",
+        title: "The OG 'Computers' & Arithmetic Evolution",
+        badge: "⭐ High Priority",
+        isRadar: true,
+        summary: "Calculations before electronic chips existed: the ancient Babylonian abacus and the original human job title of 'computer'.",
+        slang: "Pro-tip: Don't get caught calling an abacus a modern CPU, confirm kantoi.",
+        detailHtml: `
+          <p><strong>1. Ancient Beginnings:</strong> The oldest surviving abacus was used around <strong>2400 BC</strong> by the <strong>Babylonians</strong> as an arithmetic aid to enhance human calculation memory, not simply modern China.</p>
+          <p><strong>2. The Original Definition:</strong> Before electronic machines arrived, <em>'computer'</em> was actually a <strong>job title</strong> for human beings (predominantly women) who performed repetitive manual calculations for astronomical charts and navigation tables.</p>
+          <p><strong>3. Key Takeaway:</strong> Early computing was purely about offloading manual maths to mechanical gear work (Pascal, Leibniz, Jacquard's punch cards).</p>
+        `
+      },
+      {
+        id: 2,
+        chapter: "ch1",
+        chapterName: "Chapter 1",
+        title: "Hardware Core: The Motherboard, CPU & RAM",
+        badge: "⭐ High Priority",
+        isRadar: true,
+        summary: "The main printed circuit board (PCB) backbone, the processor, and why RAM is strictly temporary execution memory.",
+        slang: "Without RAM, your laptop is frozen like butter in the fridge. Stay woke.",
+        detailHtml: `
+          <p><strong>1. Motherboard:</strong> The central communications backbone and main printed circuit board (PCB) connecting all hardware components and external peripherals.</p>
+          <p><strong>2. Processor (CPU):</strong> The electronic chip that interprets and executes the fundamental instructions driving the computer.</p>
+          <p><strong>3. Computer Memory (RAM):</strong> Holds instructions and data waiting to be executed by the processor. It is volatile and dynamic—not permanent storage!</p>
+        `
+      },
+      {
+        id: 3,
+        chapter: "ch1",
+        chapterName: "Chapter 1",
+        title: "Software Anatomy: System vs Database Tools",
+        badge: "⭐ High Priority",
+        isRadar: true,
+        summary: "Primary functions of System Software vs Application software like MySQL and Oracle enterprise databases.",
+        slang: "System software runs the house; database software hoards the receipts efficiently.",
+        detailHtml: `
+          <p><strong>1. System Software:</strong> Responsible for directly managing the physical computer hardware, devices, and memory so that application programs run seamlessly (e.g. Windows, macOS, Linux, device drivers).</p>
+          <p><strong>2. Database Software (MySQL / Oracle):</strong> Specifically engineered for commercial enterprises to organise, store, index, and retrieve massive volumes of records accurately.</p>
+          <p><strong>3. Computer Literacy:</strong> Having the practical knowledge and skill to operate computers and digital tools efficiently in day-to-day work.</p>
+        `
+      },
+      {
+        id: 4,
+        chapter: "ch1",
+        chapterName: "Chapter 1",
+        title: "ICT in Society: Hospitals, Schools & Digital Ethics",
+        badge: "⚡ Major Section Case",
+        isRadar: true,
+        summary: "Electronic Health Records (EHR) & Telemedicine vs Open Distance Learning & teacher development, plus copyright ethics.",
+        slang: "Downloading pirated textbook PDFs without asking is illegal, fr fr. Give credit to creators!",
+        detailHtml: `
+          <p><strong>1. Healthcare Sector:</strong></p>
+          <ul class="list-disc ml-5 space-y-1">
+            <li><strong>Electronic Health Records (EHR):</strong> Consolidates patient history, allergies, and blood types in one secure database to prevent fatal medical errors.</li>
+            <li><strong>Telemedicine:</strong> Remote consultations linking rural patients to urban specialists, reducing travel expenses and hospital congestion.</li>
+          </ul>
+          <p class="mt-2"><strong>2. Education Sector:</strong></p>
+          <ul class="list-disc ml-5 space-y-1">
+            <li><strong>Online Distance Learning:</strong> Cloud LMS portals allowing students to review recorded lectures and study flexibly from anywhere.</li>
+            <li><strong>Teacher Professional Development:</strong> Equipping instructors with interactive tools, quizzes, and multimedia resources to boost critical thinking.</li>
+          </ul>
+          <p class="mt-2"><strong>3. Ethical Dilemmas:</strong> Online copyright infringement hurts creators financially (solve via academic referencing), while excessive screen addiction triggers anxiety and FOMO (solve via disciplined screen limits).</p>
+        `
+      },
+      {
+        id: 5,
+        chapter: "ch2",
+        chapterName: "Chapter 2",
+        title: "Traditional Software vs Digital Communication Tech (DCT)",
+        badge: "⚡ Major Comparison",
+        isRadar: true,
+        summary: "Single-workstation document production (Word, Excel) compared to network-driven interpersonal connectivity (WhatsApp, Zoom, VoIP).",
+        slang: "Word is for solo grinding your assignment; WhatsApp is for spamming 'dah siap ke belum?'",
+        detailHtml: `
+          <p><strong>1. Traditional Computer-Based Software:</strong></p>
+          <ul class="list-disc ml-5 space-y-1">
+            <li>Primary purpose: Create, format, and save local documents on an individual workstation.</li>
+            <li>Operates completely offline without an active network connection.</li>
+            <li>Examples: Microsoft Word, Microsoft Excel, Adobe Photoshop.</li>
+          </ul>
+          <p class="mt-2"><strong>2. Digital Communication Technologies (DCT):</strong></p>
+          <ul class="list-disc ml-5 space-y-1">
+            <li>Primary purpose: Transmit messages, files, voice, and live data between remote users over a network.</li>
+            <li>Requires an active transmission channel (Wi-Fi, 4G/5G, LAN) to exchange data packets.</li>
+            <li>Examples: VoIP, WhatsApp, Zoom, email clients.</li>
+          </ul>
+        `
+      },
+      {
+        id: 6,
+        chapter: "ch2",
+        chapterName: "Chapter 2",
+        title: "ARPANET (1969–1990) vs The World Wide Web",
+        badge: "⭐ High Priority",
+        isRadar: true,
+        summary: "The underlying physical military network infrastructure versus the hypertext information system developed on top.",
+        slang: "ARPANET is the highway; WWW is the sports car driving on it. Don't mix them up, bro.",
+        detailHtml: `
+          <p><strong>1. ARPANET (1969):</strong> Built by DARPA as the underlying physical packet-switching network infrastructure connecting computer nodes together. It was officially <strong>decommissioned in 1990</strong>.</p>
+          <p><strong>2. World Wide Web (WWW):</strong> Developed in the late 1980s by Tim Berners-Lee as an information retrieval service (HTTP/HTML) operating <em>on top</em> of the physical Internet infrastructure.</p>
+          <p><strong>3. Communications Devices:</strong> Hardware units (e.g. network interface cards, modems, routers) that act as the physical sending/receiving interface across a transmission medium.</p>
+        `
+      },
+      {
+        id: 7,
+        chapter: "ch2",
+        chapterName: "Chapter 2",
+        title: "Digital Communication Culture: Etiquette & Tone Traps",
+        badge: "⭐ High Priority",
+        isRadar: true,
+        summary: "Why written text lacks body language, leading to conflicts, and the vital role of professional email manners.",
+        slang: "Sending 'k.' in email hits differently than face-to-face. Mind your tone, no cap.",
+        detailHtml: `
+          <p><strong>1. Tone & Intent Misinterpretation:</strong> Pure text communication strips away physical body language, facial expressions, and vocal cadence, meaning innocent remarks can easily read as passive-aggressive or hostile.</p>
+          <p><strong>2. Workplace Email Etiquette:</strong> Crucial for maintaining professional decorum, setting clear boundaries, preventing project confusion, and upholding institutional reputation.</p>
+          <p><strong>3. Multimedia Integration:</strong> The seamless fusion of text, audio, images, and video to provide richer, contextual communication.</p>
+        `
+      },
+      {
+        id: 8,
+        chapter: "ch2",
+        chapterName: "Chapter 2",
+        title: "The 4 Golden Rules of Cybersecurity & Privacy",
+        badge: "⚡ Major Section Case",
+        isRadar: true,
+        summary: "Password complexity, hyperlink verification, safeguarding personal identity, and scrubbing camera geolocation metadata.",
+        slang: "Posting photos with live GPS tags is literally telling strangers where your dorm is. Pure red flag.",
+        detailHtml: `
+          <p><strong>Rule 1: Enforce Complex Passwords & Rotate Regularly:</strong> Use 8–12 alphanumeric characters with symbols. Weak passwords allow brute-force intrusion and identity theft.</p>
+          <p><strong>Rule 2: Inspect Hyperlinks Before Clicking:</strong> Hover over web links and sender addresses to detect phishing scripts, malicious redirects, and credential harvesters.</p>
+          <p><strong>Rule 3: Keep Sensitive Credentials Off Social Media:</strong> Never upload images showing student IDs, MyKad numbers, or home addresses to prevent cyberstalking and fraud.</p>
+          <p><strong>Rule 4: Disable Camera Geolocation (EXIF Metadata):</strong> Photos automatically embed latitude and longitude coordinates that expose your exact physical residence to strangers.</p>
+        `
+      },
+      {
+        id: 9,
+        chapter: "ch3",
+        chapterName: "Chapter 3",
+        title: "Blended Learning & Study Group Mastery",
+        badge: "⚡ Major Section Case",
+        isRadar: true,
+        summary: "Balancing on-campus face-to-face revision with asynchronous online LMS modules, video apps, and accountability rules.",
+        slang: "Set a quiz deadline by Saturday night, or whoever ponteng buys roti canai for everyone. Slay.",
+        detailHtml: `
+          <p><strong>1. Campus Activities (F2F):</strong> Group library revision for challenging lectures and completing past-year paper drills collaboratively under timed conditions.</p>
+          <p><strong>2. Home Online Activities:</strong> Reviewing recorded LMS lecture clips at your own pace and sharing educational links/summaries on group channels.</p>
+          <p><strong>3. Collaboration Apps:</strong> Zoom/Google Meet for live synchronous screen sharing; WhatsApp/Telegram for quick daily updates and sharing PDF notes.</p>
+          <p><strong>4. Group Accountability Rules:</strong> Mandate weekly quiz submission screenshots by Saturday 11:59 PM to curb procrastination; require anyone with an unexcused absence to prepare summary notes for the next unit.</p>
+        `
+      },
+      {
+        id: 10,
+        chapter: "ch3",
+        chapterName: "Chapter 3",
+        title: "Synchronous vs Asynchronous Communication",
+        badge: "⚡ Major Comparison",
+        isRadar: true,
+        summary: "Live video feeds vs flexible threaded discussions—and which platform is best for unstable internet connections.",
+        slang: "Unstable 3G in kampung? Asynchronous tools are your real MVP. Download offline and chill.",
+        detailHtml: `
+          <p><strong>1. Synchronous (Live):</strong> Real-time interaction (Zoom, Teams, live chat). Offers instant feedback and classroom energy, but demands strong, uninterrupted bandwidth and rigid schedules.</p>
+          <p><strong>2. Asynchronous (Non-Live):</strong> Flexible, self-paced interaction (forums, LMS uploads, email). Allows thoughtful reflection and works on your schedule, but lacks instantaneous replies.</p>
+          <p><strong>3. The Verdict for Poor Internet:</strong> <strong>Asynchronous tools are far superior</strong> for slow or fluctuating connections because students can connect briefly to download slides, review them completely offline without lag, and reconnect for a minute to upload tasks.</p>
+        `
+      },
+      {
+        id: 11,
+        chapter: "ch3",
+        chapterName: "Chapter 3",
+        title: "Web-Based Communication Topologies (1:1, 1:N, N:N)",
+        badge: "General Concept",
+        isRadar: false,
+        summary: "Understanding the direction of digital dialogue in online learning environments.",
+        slang: "Lecturer blasting an announcement is 1:N; your chaotic WhatsApp group call is N:N.",
+        detailHtml: `
+          <p><strong>1. One-to-One (1:1):</strong> Direct private exchange between two parties, e.g. a student emailing their lecturer for academic guidance.</p>
+          <p><strong>2. One-to-Many (1:N):</strong> Broadcast communication where a single sender transmits to a mass audience, e.g. a lecturer posting an announcement on the LMS dashboard.</p>
+          <p><strong>3. Many-to-Many (N:N):</strong> Collaborative multi-user discussions where every participant can interact simultaneously, e.g. class discussion forums and group breakout sessions.</p>
+        `
+      },
+      {
+        id: 12,
+        chapter: "ch3",
+        chapterName: "Chapter 3",
+        title: "EduTech Tools: Hardware vs Digital Applications",
+        badge: "General Concept",
+        isRadar: false,
+        summary: "Physical classroom hardware (Interactive Whiteboards, visualisers) versus software ecosystems (LMS portals, Canva).",
+        slang: "Smartboard is the physical screen; your design app is where the aesthetic slides actually get cooked.",
+        detailHtml: `
+          <p><strong>1. Hardware Components:</strong> Interactive touch whiteboards, student tablets, laptops, and document cameras (visualisers) used to project physical objects.</p>
+          <p><strong>2. Software Solutions:</strong> Learning Management Systems (Moodle, Canvas, Google Classroom), creative tools (Canva, CapCut), and digital assessment systems (timed online MCQs, e-portfolios).</p>
+        `
+      }
+    ];
+
+    let currentFilter = 'all';
+    let radarOnly = false;
+
+    function renderCards() {
+      const grid = document.getElementById('cardsGrid');
+      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+      grid.innerHTML = '';
+
+      const filtered = topics.filter(item => {
+        const matchesFilter = (currentFilter === 'all') || (item.chapter === currentFilter);
+        const matchesRadar = !radarOnly || item.isRadar;
+        const matchesSearch = item.title.toLowerCase().includes(searchVal) ||
+                              item.summary.toLowerCase().includes(searchVal) ||
+                              item.chapterName.toLowerCase().includes(searchVal);
+        return matchesFilter && matchesRadar && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        document.getElementById('noResults').classList.remove('hidden');
+      } else {
+        document.getElementById('noResults').classList.add('hidden');
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        const radarClass = item.isRadar ? 'radar-glow border-amber-500/40 bg-slate-900/90' : 'border-slate-800 bg-slate-900/60';
+        
+        card.className = `rounded-2xl border p-5 flex flex-col justify-between transition-all duration-300 hover:scale-[1.01] hover:border-blue-500/50 cursor-pointer ${radarClass}`;
+        card.onclick = () => openModal(item.id);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">${item.chapterName}</span>
+              ${item.isRadar ? `
+                <span class="text-[11px] font-bold text-amber-300 bg-amber-950/60 border border-amber-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                  ${item.badge}
+                </span>
+              ` : `
+                <span class="text-[11px] font-medium text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">${item.badge}</span>
+              `}
+            </div>
+            <h3 class="text-base font-bold text-white mb-2 leading-snug hover:text-blue-400 transition-colors">${item.title}</h3>
+            <p class="text-xs text-slate-300 line-clamp-3 mb-4 leading-relaxed">${item.summary}</p>
+          </div>
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+            <span class="text-slate-400 italic">${item.slang}</span>
+            <span class="text-blue-400 font-semibold inline-flex items-center gap-1 group">
+              Read Note 
+              <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </span>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-filter') === filter) {
+          btn.className = "filter-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition-all shadow-sm";
+        } else {
+          btn.className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition-all";
+        }
+      });
+      renderCards();
+    }
+
+    function toggleRadarOnly() {
+      radarOnly = !radarOnly;
+      const btn = document.getElementById('radarToggleBtn');
+      if (radarOnly) {
+        btn.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 border border-amber-400 transition-all shadow-lg";
+      } else {
+        btn.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 border border-amber-500/30 text-amber-300 hover:bg-amber-950/30 transition-all";
+      }
+      renderCards();
+    }
+
+    function openModal(id) {
+      const item = topics.find(t => t.id === id);
+      if (!item) return;
+      document.getElementById('modalChapter').innerText = item.chapterName + " • " + item.badge;
+      document.getElementById('modalTitle').innerText = item.title;
+      document.getElementById('modalBody').innerHTML = item.detailHtml;
+      document.getElementById('modalSlangTip').innerText = item.slang;
+      document.getElementById('modalBackdrop').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modalBackdrop').classList.add('hidden');
+    }
+
+    window.onclick = function(event) {
+      const backdrop = document.getElementById('modalBackdrop');
+      if (event.target === backdrop) {
+        closeModal();
+      }
+    };
+
+    // Initialize
+    renderCards();
+  </script>
+</body>
+</html>
